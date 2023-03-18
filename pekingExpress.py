@@ -1,32 +1,16 @@
-import json
+import board
+import matplotlib.pyplot as plt
 
-with open('pekingExpressTest1.json') as f:
-  board = json.load(f)
-print(board)
+json_file = 'pekingExpressTest1.json'
 
-locationNumber = board["locations"]["number"]
-criticalLocation = board["locations"]["critical"]
-sources = board["roads"]["source"]
-targets = board["roads"]["target"]
-prices = board["roads"]["price"]
-startLocation = board["startLocation"]
-budget = board["budget"]
-finishLocation = 88
-print(f'{locationNumber=}')
-print(f'{criticalLocation=}')
-print(f'{sources=}')
-print(f'{targets=}')
-print(f'{prices=}')
-print(f'{startLocation=}')
-print(f'{budget=}')
-print(f'{finishLocation=}')
+game = board.Board(json_file)
 
-# might want to change None to -1 but idk if edges can have minus value
-adjMatrix = [[None for j in range(finishLocation+1)] for i in range(finishLocation+1)]
+print(f"nodes={game.graph.nodes}")
+print(f"edges={game.graph.edges}")
+print(f"critical={game.critical_locations}")
+print(f"start={game.start_node}")
+print(f"target={game.target_node}")
+print(f"budget={game.budget}")
 
-for i in range(len(prices)):
-  adjMatrix[sources[i]][targets[i]] = prices[i]
-  # is it undirected?
-  adjMatrix[targets[i]][sources[i]] = prices[i]
-
-print(adjMatrix)
+game.visualize()
+plt.show()
