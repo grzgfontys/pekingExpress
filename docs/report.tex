@@ -288,15 +288,15 @@ Formally:
         \KwRet{$\emptyset$}\;
     }
     \Else{
+    $R \longleftarrow = \emptyset$\;    
     \ForEach{$b \in V$, such that $(a,b) \in E$}{
-    $R \longleftarrow = \emptyset$\;
-    \If{$z_n(b, t-t_{ab}) < z_n(a,t)$}{
-    $P \longleftarrow \FPaths{a,t}$\;
-    \ForEach{$p \in P$}{
-        $p' \longleftarrow \FCombine{a,p}$\;
-        add $p'$ to $R$
-    }
-    }
+        \If{$t_{ab} \leq t \land z_n(b, t-t_{ab}) < z_n(a,t)$}{
+        $P \longleftarrow \FPaths{a,t}$\;
+        \ForEach{$p \in P$}{
+            $p' \longleftarrow \FCombine{a,p}$\;
+            add $p'$ to $R$
+        }
+        }
     }
     \KwRet{$R$}\;
     }
