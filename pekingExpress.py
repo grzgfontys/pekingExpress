@@ -1,25 +1,27 @@
 import board
+import solver
 import matplotlib.pyplot as plt
 
 json_file = 'pekingExpressTest1.json'
 json_file = 'pekingExpressTest2.json'
 
-game = board.Board(json_file)
-playerPosition = game.start_node
-computerPosition = game.start_node
+board = board.Board(json_file)
+playerPosition = board.start_node
+computerPosition = board.start_node
 
-print(f"nodes={game.graph.nodes}")
-print(f"edges={game.graph.edges}")
-print(f"critical={game.critical_locations}")
-print(f"start={game.start_node}")
-print(f"target={game.peking}")
-print(f"budget={game.budget}")
+print(f"nodes={board.graph.nodes}")
+print(f"edges={board.graph.edges}")
+print(f"critical={board.critical_locations}")
+print(f"start={board.start_node}")
+print(f"target={board.peking}")
+print(f"budget={board.budget}")
 
-# game.visualize()
+# board.visualize()
 # plt.show()
 
-game.createDPArray()
-game.findShortestPath(1)
+solver = solver.Solver(board)
+
+solver.createZ()
 
 winner = False
 

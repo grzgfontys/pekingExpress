@@ -15,7 +15,7 @@ class Board:
         self.locationNumber = board["locations"]["number"]
         self.critical_locations = board["locations"]["critical"]
         self.start_node = board["startLocation"]
-        self.peking = 88
+        self.peking = 10
         self.budget = board["budget"]
         self.maxNodeNumber = (self.peking if self.peking > self.locationNumber else self.locationNumber) + 1
         self.dpArray = []
