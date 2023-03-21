@@ -2,6 +2,7 @@ import sys
 import json
 import networkx as nx
 import matplotlib.pyplot as plt
+from collections import deque
 
 
 class Board:
@@ -14,9 +15,10 @@ class Board:
         self.locationNumber = board["locations"]["number"]
         self.critical_locations = board["locations"]["critical"]
         self.start_node = board["startLocation"]
-        self.target_node = 88
+        self.peking = 88
         self.budget = board["budget"]
-        self.maxNodeNumber = (self.target_node if self.target_node > self.locationNumber else self.locationNumber) + 1
+        self.maxNodeNumber = (self.peking if self.peking > self.locationNumber else self.locationNumber) + 1
+        self.dpArray = []
 
         # initialize graph
         self.graph = nx.DiGraph()
@@ -24,8 +26,12 @@ class Board:
             (dst, cost) = (road_data["target"][i], road_data["price"][i])
             self.graph.add_edge(src, dst, cost=cost)
 
+        self.graph = self.graph.to_undirected()
+
         for critical in self.critical_locations:
             self.graph.nodes[critical]["critical"] = True
+
+        self.dpArray = self.createDPArray()
 
     def possibleMovesString(self, position):
         moves = []
@@ -85,7 +91,7 @@ class Board:
 
         for cout in range(self.maxNodeNumber):
             # if shortest path to node 88 was find there is no need to search more
-            if sptSet[88]:
+            if sptSet[self.peking]:
                 break
 
             # Pick the minimum distance vertex from
@@ -109,7 +115,34 @@ class Board:
             for nbr in self.possibleMoves(currentNode):
                 if sptSet[nbr[0]] == False and dist[nbr[0]][0] > dist[currentNode][0] + nbr[1]:
                     dist[nbr[0]] = (dist[currentNode][0] + nbr[1], currentNode)
-        nextNode = dist[88]
+        nextNode = dist[self.peking]
         while dist[nextNode[0]][0] != src:
             nextNode = dist[nextNode[0]]
         return nextNode[1]
+    
+    def createDPArray(self):
+
+        dp = [[sys.maxsize for j in range(self.maxNodeNumber+1)] for i in range(self.budget+1)]
+
+        for i in range(self.budget+1):
+            dp[i][self.peking] = 0
+
+        q = deque()
+        isPath = False
+        q.append((self.peking, 0))
+
+        while q:
+            currentNode = q.popleft()
+
+
+            for nbr in self.possibleMoves(currentNode[0]):
+                for i in range(self.budget+1):
+                    if dp[i][currentNode[0]] + nbr[1] <= i and dp[i][currentNode[0]] + nbr[1] <= dp[i][nbr[0]]:
+                        dp[i][nbr[0]] = dp[i][currentNode[0]] + nbr[1]
+                        isPath = True
+
+                if isPath:
+                    q.append(nbr)
+                    isPath = False
+
+        fin = True
