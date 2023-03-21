@@ -1,9 +1,10 @@
 import board
 import solver
 import matplotlib.pyplot as plt
+from solver import Solver
 
 json_file = 'pekingExpressTest1.json'
-json_file = 'pekingExpressTest2.json'
+# json_file = 'pekingExpressTest2.json'
 
 board = board.Board(json_file)
 playerPosition = board.start_node
@@ -21,9 +22,11 @@ print(f"budget={board.budget}")
 
 solver = solver.Solver(board)
 
-solver.createZ()
 
 winner = False
+
+
+print([p for p in solver.shortest_paths(1, 3)])
 
 # while not winner:
 #     print("Your possibe moves: ")
