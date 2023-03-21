@@ -19,7 +19,7 @@ class Solver:
             yield [a]
             return
 
-        if current_distance == sys.maxsize or t <= 0:
+        if current_distance >= sys.maxsize or t <= 0:
             return
 
         for b in self.board.graph.adj[a]:
