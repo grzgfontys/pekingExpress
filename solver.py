@@ -62,6 +62,18 @@ class Solver:
             if new_distance < current_distance:
                 yield b
 
+    def defensive_strategy(self, a_paths, b_paths):
+        """chooses the path from a that minimizes chance of getting blocked by b and maximizes chances of blocking b"""
+        b_paths = list(b_paths)  # convert to list to prevent multiple enumerations of a generator
+        blocking_min, blocked_max, best_path = sys.maxsize, 0, None
+        for a in a_paths:
+            blocking, blocked = self.blocking_scores(a, b_paths)
+            if blocking < blocking_min or (blocking == blocking_min and blocked > blocked_max):
+                blocking_min, blocked_max, best_path = blocking, blocked, a
+
+        assert best_path is not None
+        return best_path
+
     def __create_z(self):
         z = dict()
 
