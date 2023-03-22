@@ -20,6 +20,7 @@ class Solver:
             yield [a]
             return
 
+        # not necessary, but break early
         if current_distance >= sys.maxsize or t <= 0:
             return
 
@@ -54,7 +55,7 @@ class Solver:
     def viable_moves(self, a, t: int):
         for b in self.board.graph.adj[a]:
             current_distance = self.z(a, t)
-            cost = self.board.graph.edges[a, b]['cost']
+            cost = self.board.cost(a, b)
             if t < cost:  # cannot afford
                 continue
             new_distance = self.z(b, t - cost)
@@ -64,16 +65,16 @@ class Solver:
     def __create_z(self):
         z = dict()
 
-        for tmpBudget in range(self.board.budget + 1):
+        for budget in range(self.board.budget + 1):
             for node in self.board.graph.nodes():
                 if node == self.board.peking:
-                    z[tmpBudget, node] = 0
+                    z[budget, node] = 0
                     continue
-                min_value = sys.maxsize
+                min_length = sys.maxsize
                 for nbr, cost in self.board.possibleMoves(node):
-                    if tmpBudget - cost >= 0:
-                        new_length = z[tmpBudget - cost, nbr] + 1
-                        min_value = min(min_value, new_length)
-                z[tmpBudget, node] = min_value
+                    if budget - cost >= 0:
+                        new_length = z[budget - cost, nbr] + 1
+                        min_length = min(min_length, new_length)
+                z[budget, node] = min_length
 
         return z
