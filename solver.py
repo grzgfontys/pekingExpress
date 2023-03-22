@@ -23,14 +23,20 @@ class Solver:
         if current_distance >= sys.maxsize or t <= 0:
             return
 
+        for b in self.viable_moves(a, t):
+            new_budget = t - self.board.cost(a, b)
+            for p in self.shortest_paths(b, new_budget):
+                yield [a] + p
+
+    def viable_moves(self, a, t: int):
         for b in self.board.graph.adj[a]:
-            new_budget = t - self.board.graph.edges[a, b]['cost']
-            if new_budget < 0:  # cannot afford
+            current_distance = self.z(a, t)
+            cost = self.board.graph.edges[a, b]['cost']
+            if t < cost:  # cannot afford
                 continue
-            new_distance = self.z(b, new_budget)
+            new_distance = self.z(b, t - cost)
             if new_distance < current_distance:
-                for p in self.shortest_paths(b, new_budget):
-                    yield [a] + p
+                yield b
 
     def __create_z(self):
         z = dict()

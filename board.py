@@ -31,6 +31,9 @@ class Board:
         for critical in self.critical_locations:
             self.graph.nodes[critical]["critical"] = True
 
+    def cost(self, src, dst):
+        return self.graph.edges[src, dst]['cost']
+
     def possibleMovesString(self, position):
         moves = []
 
