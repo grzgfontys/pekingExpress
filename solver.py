@@ -9,12 +9,12 @@ class Solver:
         # init Z table
         self.__z = self.__create_z()
 
-    # minimum distance of getting from node A to the target within cost T
     def z(self, a, t: int) -> int:
+        """minimum distance of getting from node a to the target within cost t"""
         return self.__z[t, a]
 
-    # set of the shortest paths from node A to the target within a budget T
     def shortest_paths(self, a, t: int):
+        """set of the shortest paths from node a to the target within a budget t"""
         current_distance = self.z(a, t)
         if a == self.board.peking:
             yield [a]
@@ -28,11 +28,9 @@ class Solver:
             for p in self.shortest_paths(b, new_budget):
                 yield [a] + p
 
-    # compares paths a and b with regard to blocking
-    # returns 0 if there are no blocks,
-    # positive value if a blocks b
-    # and negative value if b blocks a
     def blocking_cmp(self, a, b):
+        """ compares paths a and b with regard to blocking
+        returns 0 if there are no blocks, positive value if a blocks b, and negative value if b blocks a """
         critical_locations = self.board.critical_locations
         for i in range(len(a)):
             if a[i] in critical_locations:
@@ -41,6 +39,17 @@ class Solver:
                 elif i > 0 and a[i] == b[i - 1]:
                     return -1
         return 0
+
+    def blocking_scores(self, a, b_paths):
+        """returns a pair x,y where x is the number of paths a blocks, and y is the number of paths that block a"""
+        blocking, blocked = 0, 0
+        for p in b_paths:
+            cmp = self.blocking_cmp(a, p)
+            if cmp > 0:
+                blocking += 1
+            elif cmp < 0:
+                blocked += 1
+        return blocking, blocked
 
     def viable_moves(self, a, t: int):
         for b in self.board.graph.adj[a]:
