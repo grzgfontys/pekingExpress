@@ -16,10 +16,10 @@ class Board:
         self.critical_locations = board["locations"]["critical"]
         self.start_node = board["startLocation"]
         self.peking = 88
-        self.budget = board["budget"]
+        self.starting_budget = board["budget"]
         self.maxNodeNumber = (self.peking if self.peking > self.locationNumber else self.locationNumber) + 1
-        self.computer_pos, self.player_pos = self.start_node
-        self.computer_budget, self.player_budget = self.budget
+        self.computer_pos, self.player_pos = self.start_node, self.start_node
+        self.computer_budget, self.player_budget = self.starting_budget, self.starting_budget
 
         # initialize graph
         self.graph = nx.DiGraph()

@@ -43,14 +43,14 @@ class Solver:
 
     def blocking_scores(self, a, b_paths):
         """returns a pair x,y where x is the number of paths a blocks, and y is the number of paths that block a"""
-        blocking, blocked = 0, 0
+        blocking, blocked_by = 0, 0
         for p in b_paths:
             cmp = self.blocking_cmp(a, p)
             if cmp > 0:
                 blocking += 1
             elif cmp < 0:
-                blocked += 1
-        return blocking, blocked
+                blocked_by += 1
+        return blocking, blocked_by
 
     def viable_moves(self, a, t: int):
         for b in self.board.graph.adj[a]:
@@ -95,17 +95,18 @@ class Solver:
     def defensive_strategy(self, a_paths, b_paths):
         """chooses the path from a that minimizes chance of getting blocked by b and maximizes chances of blocking b"""
         b_paths = list(b_paths)  # convert to list to prevent multiple enumerations of a generator
-        blocking_min, blocked_max, best_path = sys.maxsize, 0, None
+        blocked_min, blocking_max, best_path = sys.maxsize, 0, None
         for a in a_paths:
             blocking, blocked = self.blocking_scores(a, b_paths)
-            if blocking < blocking_min or (blocking == blocking_min and blocked > blocked_max):
-                blocking_min, blocked_max, best_path = blocking, blocked, a
+            if blocked < blocked_min or (blocked == blocked_min and blocking > blocking_max):
+                blocked_min, blocking_max, best_path = blocked, blocking, a
 
         assert best_path is not None
         return best_path
 
     def choose_next_move_defensive(self, pos_a, budget_a, pos_b, budget_b):
         a_paths = self.shortest_paths(pos_a, budget_a)
+        available_a_paths = (p for p in a_paths if p[1] != pos_b or p[1] not in self.board.critical_locations)
         b_paths = self.shortest_paths(pos_b, budget_b)
         best_path = self.defensive_strategy(a_paths, b_paths)
 
@@ -138,7 +139,7 @@ class Solver:
     def __create_z(self):
         z = dict()
 
-        for budget in range(self.board.budget + 1):
+        for budget in range(self.board.starting_budget + 1):
             for node in self.board.graph.nodes():
                 if node == self.board.peking:
                     z[budget, node] = 0
