@@ -1,13 +1,13 @@
 {
     "locations": {
-        "number":4,
+        "number": 4,
         "critical": [3]
      },
     "roads": {
-        "source": [1, 1, 1, 2, 3],
-        "target": [2, 3, 88, 3, 88],
-        "price": [1, 3, 7, 1, 1]
+        "source":   [1, 1, 1, 2, 3],
+        "target":   [2, 3, 88, 3, 88],
+        "price":    [1, 3, 7, 1, 1]
      },
-    "startLocation":1,
-    "budget":5
+    "startLocation": 1,
+    "budget": 5
 }
