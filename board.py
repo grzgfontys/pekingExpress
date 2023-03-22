@@ -35,6 +35,9 @@ class Board:
 
         self.graph = self.graph.to_undirected()
 
+    def cost(self, src, dst):
+        return self.graph.edges[src, dst]['cost']
+
 
     def possibleMovesPlayer(self):
         moves = dict()
