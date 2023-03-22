@@ -9,6 +9,7 @@
 \usepackage{amssymb}
 \usepackage{array}
 \usepackage{qtree}
+\usepackage{booktabs}
 \usepackage[ruled, vlined]{algorithm2e}
 
 \DeclareMathOperator*{\bigforall}{\mbox{\Large $\mathsurround0pt \forall$}}
@@ -47,7 +48,7 @@
 
 \section{Introduction}
 
-In the game 2 players take turns traversing a directed weighted graph.
+In the game 2 players take turns traversing a weighted graph.
 One vertex is chosen as a destination and the aim of the game is to be the first player to reach that vertex.
 
 Each player starts with the same budget --- every vertex has an associated travel cost, and each time a player traverses that edge, their budget decreases by that amount.
@@ -66,11 +67,11 @@ and the critical locations are marked with a double border, in this case only on
         \node[main] (b) at (3,3) {$B$};
         \node[main, fill=red] (d) at (6,1.5) {$D$};
 
-        \draw[-latex, thick] (a) -- (b) node[midway, above] {1};
-        \draw[latex-latex, thick] (b) -- (c) node[midway, below right] {1};
-        \draw[-latex, thick] (a) -- (c) node[midway, below] {3};
-        \draw[-latex, thick] (a) -- (d) node[pos=0.7, above] {7};
-        \draw[-latex, thick] (c) -- (d) node[midway, below] {1};
+        \draw[thick] (a) -- (b) node[midway, above] {1};
+        \draw[thick] (b) -- (c) node[midway, below right] {1};
+        \draw[thick] (a) -- (c) node[midway, below] {3};
+        \draw[thick] (a) -- (d) node[pos=0.7, above] {7};
+        \draw[thick] (c) -- (d) node[midway, below] {1};
     \end{tikzpicture}
     \caption{Example map for the game with the source marked green and the target shown as red.}
     \label{fig:example-map}
@@ -230,7 +231,7 @@ The following algorithm accomplishes exactly that:
             $Z[n][t] \longleftarrow 0$\;
             \ForEach{$a \in V, a \neq n$}{
                 $z_{min} \longleftarrow \infty$\;
-                \ForEach{$b \in V$, such that $(a,b) \in E$}{
+                \ForEach{$b$ adjacent to $a$}{
                     \If{$t_{ab} \leq t$}{
                         $z_{new} \longleftarrow Z[b][t - t_{ab}] + 1$\;
                         $z_{min} = \min(z_{min}, z_{new})$
@@ -375,7 +376,7 @@ and if we still have a choice left, only then tries to maximize the $\blockingSc
 Note that if there exist a path that will with $100\%$ certainty block player $b$,
 which as we established was the only time it is viable to play aggressively, our approach will choose that option.
 
-Note that this algorithm is not guaranteed to reult in the totally best result, 
+Note that this algorithm is not guaranteed to reult in the totally best result,
 however, supported by the fact that the paths we choose from are already the shortest paths possible,
 and the applied heuristics are only aimed to even further improve the choice, we are satisfied with the result.
 
@@ -417,8 +418,8 @@ The player $b$ on the contrary, he would prefer outcome 3 over 2, and 2 over 1.
 
 We can see that we can clearly form a poset of this outcomes.
 Let's change the numbers a bit and say that the result is $+1$ if $a$ wins, $-1$ if $b$ wins, and 0 in case of a tie.
-It is now clear that if a player is presented with a set of outcomes, 
-player $a$ will try to maximize the outcome, 
+It is now clear that if a player is presented with a set of outcomes,
+player $a$ will try to maximize the outcome,
 while player $b$ will try to minimize it.
 
 This enables us to recursively evaluate any of the available moves.
@@ -428,7 +429,7 @@ This is a well known problem in game theory, very common in turn-based games.
 
 To better visualize the problem, it might be helpful to imagine the possible moves as a tree, like in fig.~\ref{fig:minimax-visualisation}.
 Each of the tree levels represents a player turn, where one player will try to choose the minimum value of its children, while the other one will choose the maximum.
-Therefore, knowing only the end scores, as in fig.~\ref{fig:minimax-empty}, we can calculate the best score one can reach from any position, 
+Therefore, knowing only the end scores, as in fig.~\ref{fig:minimax-empty}, we can calculate the best score one can reach from any position,
 by taking minimum and maximum alternately.
 The result of this is shown on fig.~\ref{fig:minimax-full}.
 
@@ -437,18 +438,18 @@ The result of this is shown on fig.~\ref{fig:minimax-full}.
 \begin{figure}[H]\centering
     \begin{subfigure}[ht]{0.4\textwidth}
         \Tree [
-            .$\max$ 
+            .$\max$
             [.$\min$ [.$\max$ -2 5 ] [.$\max$ 1 -3 ] ]
-            [.$\min$ [.$\max$  4 1 ] [.$\max$  2 0 ] ] 
+                [.$\min$ [.$\max$  4 1 ] [.$\max$  2 0 ] ]
         ]
         \caption{}
         \label{fig:minimax-empty}
     \end{subfigure}
     \begin{subfigure}[ht]{0.4\textwidth}
         \Tree [
-            .2 
-            [.1 [.5 -2 5 ] [.1 1 -3 ] ]
-            [.2 [.4  4 1 ] [.2  2 0 ] ] 
+            .2
+                [.1 [.5 -2 5 ] [.1 1 -3 ] ]
+                [.2 [.4  4 1 ] [.2  2 0 ] ]
         ]
         \caption{}
         \label{fig:minimax-full}
@@ -462,8 +463,8 @@ for performance considerations, we might want to limit the maximum depth.
 This depth will be the number of moves the algorithm examines.
 For example for depth 5, the algorithm will examine every possible position at 5 moves ahead.
 
-For the purpose of limiting the depth, 
-we need to estimate a heuristic for a situation where we reach maximum tree depth 
+For the purpose of limiting the depth,
+we need to estimate a heuristic for a situation where we reach maximum tree depth
 but game has not ended yet.
 A sufficiently good estimate can be made with the table of $z$ values we have calculated.
 We just check the shortest distance of each player to the target vertex and calculate their difference.
@@ -477,11 +478,11 @@ If $h > 0$, player $b$ is closer, and if $h = 0$, they are equally close.
 
 By introducing this heuristic we will again need to modify the evaluation values of end game states ---
 player $a$ will obviously prefer to win, than be 2 edges closer than $b$.
-Therefore, we will leave the tie at 0, 
-but situation when $a$ wins we will assign $+\infty$, 
+Therefore, we will leave the tie at 0,
+but situation when $a$ wins we will assign $+\infty$,
 and when $b$ wins, $-\infty$.
 
-Thanks to this, we can statically evaluate every position, and therefore, 
+Thanks to this, we can statically evaluate every position, and therefore,
 we can use a popular minimax algorithm, which looks the following:
 
 \begin{algorithm}[H]
@@ -500,14 +501,14 @@ we can use a popular minimax algorithm, which looks the following:
         \uIf{maximizingPlayer}{
             $maxEval \longleftarrow -\infty$\;
             \ForEach{next position}{
-                $eval \longleftarrow$ \Fminimax{next, $depth - 1$,\false}\; 
+                $eval \longleftarrow$ \Fminimax{next, $depth - 1$,\false}\;
                 $maxEval \longleftarrow$ \Fmax{eval, maxEval}\;
             }
             \KwRet{$maxEval$}\;
         }\Else(\tcc*[f]{minimizing player}){
             $minEval \longleftarrow \infty$\;
             \ForEach{next position}{
-                $eval \longleftarrow$ \Fminimax{next, $depth - 1$,\true}\; 
+                $eval \longleftarrow$ \Fminimax{next, $depth - 1$,\true}\;
                 $minEval \longleftarrow$ \Fmin{eval, maxEval}\;
             }
             \KwRet{$minEval$}\;
@@ -516,5 +517,101 @@ we can use a popular minimax algorithm, which looks the following:
     \caption{General scheme of minimax algorithm}
     \label{alg:minimax_basic}
 \end{algorithm}
+
+\section{Testing}
+
+\begin{figure}[H]\centering
+    \normalsize
+    \begin{tikzpicture}[main/.style = {draw, circle}, scale=1.5]
+        \node[main] (n1) at (-0.5,3) {1};
+        \node[main] (n2) at (-0.5,1) {2};
+
+        \node[main] (n3) at (1,4) {3};
+        \node[main] (n4) at (1,3) {4};
+        \node[main] (n5) at (1,1) {5};
+
+        \node[main] (n6) at (2,4) {6};
+        \node[main, double, double distance=1pt] (n7) at (2,2) {7};
+        \node[main] (n8) at (2,0) {8};
+
+        \node[main] (n11) at (3,1.25) {11};
+        \node[main] (n12) at (3,0) {12};
+
+        \node[main] (n9) at (3.5,4) {9};
+        \node[main] (n10) at (3.5,2.75) {10};
+
+        \node[main] (n13) at (4,1.25) {13};
+        \node[main] (n14) at (4,0) {14};
+
+        \node[main, fill=red!90] (n88) at (6,2) {88};
+
+        \draw (n1) -- (n4) node[midway,below]{1};
+        \draw (n1) -- (n3) node[midway,above]{1};
+        \draw (n2) -- (n5) node[midway,above]{1};
+
+        \draw (n3) -- (n6) node[midway,above]{1};
+        \draw (n4) -- (n7) node[midway,above]{1};
+        \draw (n5) -- (n7) node[midway,above]{2};
+        \draw (n5) -- (n8) node[midway,above]{1};
+
+        \draw (n6) -- (n9) node[midway,above]{1};
+        \draw (n7) -- (n10) node[midway,above]{2};
+        \draw (n7) -- (n11) node[midway,above]{1};
+        \draw (n8) -- (n12) node[midway,above]{1};
+
+        \draw (n11) -- (n13) node[midway,above]{1};
+        \draw (n12) -- (n14) node[midway,above]{1};
+
+        \draw (n9) -- (n88) node[midway,above]{1};
+        \draw (n10) -- (n88) node[midway,above]{2};
+        \draw (n13) -- (n88) node[midway,above]{1};
+        \draw (n14) -- (n88) node[midway,above]{1};
+    \end{tikzpicture}
+    \caption{Graph used for testing}
+    \label{fig:test-graph}
+\end{figure}
+
+\begin{table}[H]\centering
+    \begin{tabular}{|c|cccccccc|}
+        \hline
+           & 0        & 1        & 2        & 3        & 4        & 5 & 6 & 7 \\ \hline
+        1  & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 4        & 4 & 4 & 4 \\
+        2  & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 5 & 5 & 4 \\
+        3  & $\infty$ & $\infty$ & $\infty$ & 3        & 3        & 3 & 3 & 3 \\
+        4  & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 4        & 3 & 3 & 3 \\
+        5  & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 4        & 4 & 3 & 3 \\
+        6  & $\infty$ & $\infty$ & 2        & 2        & 2        & 2 & 2 & 2 \\
+        7  & $\infty$ & $\infty$ & $\infty$ & 3        & 2        & 2 & 2 & 2 \\
+        8  & $\infty$ & $\infty$ & $\infty$ & 3        & 3        & 3 & 3 & 3 \\
+        9  & $\infty$ & 1        & 1        & 1        & 1        & 1 & 1 & 1 \\
+        10 & $\infty$ & $\infty$ & 1        & 1        & 1        & 1 & 1 & 1 \\
+        11 & $\infty$ & $\infty$ & 2        & 2        & 2        & 2 & 2 & 2 \\
+        12 & $\infty$ & $\infty$ & 2        & 2        & 2        & 2 & 2 & 2 \\
+        13 & $\infty$ & 1        & 1        & 1        & 1        & 1 & 1 & 1 \\
+        14 & $\infty$ & 1        & 1        & 1        & 1        & 1 & 1 & 1 \\
+        88 & 0        & 0        & 0        & 0        & 0        & 0 & 0 & 0 \\
+        \hline
+    \end{tabular}
+    \caption{Expected $z$ table of graph from fig.~\ref*{fig:test-graph}}
+\end{table}
+
+\begin{table}[H]\centering
+    \begin{tabular}{c|cccc|c}
+        \toprule
+        No & $v_a$ & $t_a$ & $v_b$ & $t_b$ & expected move of $a$ \\ \midrule
+        1  & 1     & 7     & 2     & 7     & 4                    \\
+        2  & 1     & 6     & 5     & 5     & 3                    \\
+        3  & 1     & 6     & 5     & 4     & 4                    \\
+        4  & 5     & 4     & 4     & 5     & 7                    \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{enumerate}
+    \item $a$ should choose 4 to block $b$
+    \item $a$ should choose 3 to avoid block by $b$
+    \item $a$ can go to 4, because $b$ will not reach target from $7$
+    \item $a$ should go to $7$ to block $b$
+\end{enumerate}
 
 \end{document}
