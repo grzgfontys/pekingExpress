@@ -82,6 +82,29 @@ class Solver:
         # the first is pos_a, so we return the second node
         return best_path[1]
 
+    def __game_over_score(self, pos_a, budget_a, pos_b, budget_b, a_is_white):
+        target = self.board.peking
+        if pos_a != target and pos_b != target:
+            return None
+        if pos_b == target and pos_a == target:
+            raise "Should not happen"  # should be evaluated earlier
+        if a_is_white:
+            if pos_b == target:
+                return -sys.maxsize  # black win
+            if pos_a == target:
+                if target in self.viable_moves(pos_b, budget_b):
+                    return 0  # b can reach target just after white, tie
+                else:
+                    return sys.maxsize  # white wins
+        else:  # b is white
+            if pos_a == target:
+                return sys.maxsize  # black win
+            if pos_b == target:
+                if target in self.viable_moves(pos_a, budget_a):
+                    return 0  # a can reach target just after white, tie
+                else:
+                    return -sys.maxsize  # white wins
+
     def __create_z(self):
         z = dict()
 
