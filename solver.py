@@ -74,6 +74,14 @@ class Solver:
         assert best_path is not None
         return best_path
 
+    def choose_next_move_defensive(self, pos_a, budget_a, pos_b, budget_b):
+        a_paths = self.shortest_paths(pos_a, budget_a)
+        b_paths = self.shortest_paths(pos_b, budget_b)
+        best_path = self.defensive_strategy(a_paths, b_paths)
+
+        # the first is pos_a, so we return the second node
+        return best_path[1]
+
     def __create_z(self):
         z = dict()
 
