@@ -18,7 +18,8 @@ class Board:
         self.peking = 88
         self.budget = board["budget"]
         self.maxNodeNumber = (self.peking if self.peking > self.locationNumber else self.locationNumber) + 1
-        self.dpArray = []
+        self.computer_pos, self.player_pos = self.start_node
+        self.computer_budget, self.player_budget = self.budget
 
         # initialize graph
         self.graph = nx.DiGraph()
@@ -26,19 +27,28 @@ class Board:
             (dst, cost) = (road_data["target"][i], road_data["price"][i])
             self.graph.add_edge(src, dst, cost=cost)
 
-        self.graph = self.graph.to_undirected()
+        for node in self.graph.nodes():
+            self.graph.nodes[node]["critical"] = False
 
         for critical in self.critical_locations:
             self.graph.nodes[critical]["critical"] = True
 
+        self.graph = self.graph.to_undirected()
+
     def cost(self, src, dst):
         return self.graph.edges[src, dst]['cost']
 
-    def possibleMovesString(self, position):
-        moves = []
 
-        for nbr, datadict in self.graph.adj[position].items():
-            moves.append(f"Move to {nbr} with cost of { datadict['cost']}")
+    def possibleMovesPlayer(self):
+        moves = dict()
+
+        for nbr, datadict in self.graph.adj[self.player_pos].items():
+            if self.graph.nodes[nbr]["critical"] and self.computer_pos == nbr:
+                continue
+            if self.player_budget is not None:
+                if datadict["cost"] > self.player_budget:
+                    continue
+            moves[nbr] = datadict["cost"]
 
         return moves
 
