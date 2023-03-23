@@ -54,7 +54,7 @@ One vertex is chosen as a destination and the aim of the game is to be the first
 Each player starts with the same budget --- every vertex has an associated travel cost, and each time a player traverses that edge, their budget decreases by that amount.
 Players can only traverse an edge if their current budget is higher than the cost associated with that edge.
 
-Additionally, some of the graph's vertices are \emph{critical locations}, meaning that they can only accomodate one player at a time.
+Additionally, some of the graph's vertices are \emph{critical locations}, meaning that they can only accommodate one player at a time.
 
 An example map is shown on the fig.~\ref*{fig:example-map} below.
 The start location is node $A$, marked in green, the target is node $D$ shown in red,
@@ -110,7 +110,7 @@ For all $p \in P$ define the functions $C: P \to \mathbb{Z}^+$, and $R: P \to \m
 \end{align}
 
 The aim of the game is to reach the target in the shortest amount of moves while staying within the budget.
-Therefore, we want to find such $p \in P(\source,\target)$ that minimizes the value of $C(p)$ while maintaing the condition $R(p) \leq t_{max}$.
+Therefore, we want to find such $p \in P(\source,\target)$ that minimizes the value of $C(p)$ while maintaining the condition $R(p) \leq t_{max}$.
 This is the classic example of a well-known resource-constrained shortest path problem (RCSP).
 
 \subsection{Critical location limitations}
@@ -120,7 +120,7 @@ This is the classic example of a well-known resource-constrained shortest path p
 Now consider 2 simple paths: $p_a = (a_1, \ldots, a_n)$, and $p_b = (b_1, \ldots, b_k)$, where $a_n = b_k = \target$.
 They will denote the shortest path chosen by each player respectively.
 
-Since the critical loactions can only host one player at the time,
+Since the critical locations can only host one player at the time,
 if both of the paths contain some critical location $c$, the players can block each other.
 
 Assume player $a$ moves first.
@@ -137,7 +137,7 @@ This equation is an obvious consequence of the one above it, because after makin
 resulting in situation where the second player will be in a blocking advantage.
 
 Additionally, if both conditions occur,
-the one that occured first has a precedence,
+the one that occurred first has a precedence,
 that is, for some critical $c_1, c_2$:
 \begin{equation}
     \exists i,j : (a_i = b_i = c_1 \land a_j = b_{j-1} = c_2) \implies
@@ -175,7 +175,7 @@ that is, for some critical $c_1, c_2$:
         \draw[ar] (n) -- (b3);
         \draw[ar] (b3) -- (target);
     \end{tikzpicture}
-    \caption{Illurtration of two paths that might block}
+    \caption{Illustration of two paths that might block}
 \end{figure}
 
 
@@ -185,7 +185,7 @@ This problem can be solved in 2 approaches:
 starting from source to all of the nodes reachable from it,
 or starting from the target, to all of the nodes it is reachable from.
 
-Since thrroughout the game the starting positions would stay the same,
+Since throughout the game the starting positions would stay the same,
 but the target node $\target$ will be constant, we will use the second approach.
 
 Let $z(a, t)$ be $\min \{ C(p) \mid p \in P(a,\target), T(p) \leq t \}$.
@@ -250,7 +250,7 @@ The following algorithm accomplishes exactly that:
 Let $\p(a,t)$ denote a set of all shortest paths from $a$ to $\target$, constrained by maximum resource usage $t$.
 Since all of these paths are the shortest, all of them have the same length equal to $z(a,t)$.
 
-Therefore, the set $\p(a,t)$ can be expressed as a follwing:
+Therefore, the set $\p(a,t)$ can be expressed as a following:
 
 \begin{equation*}
     \p(a,t) = \big\{ p \in P(a,\target) \mid C(p) = z(a,t) \big\}
@@ -377,7 +377,7 @@ and if we still have a choice left, only then tries to maximize the $\blockingSc
 Note that if there exist a path that will with $100\%$ certainty block player $b$,
 which as we established was the only time it is viable to play aggressively, our approach will choose that option.
 
-Note that this algorithm is not guaranteed to reult in the totally best result,
+Note that this algorithm is not guaranteed to result in the totally best result,
 however, supported by the fact that the paths we choose from are already the shortest paths possible,
 and the applied heuristics are only aimed to even further improve the choice, we are satisfied with the result.
 
@@ -623,10 +623,10 @@ This addition will transform algorithm \ref{alg:minimax_basic} into the followin
 Let $b$ denote the average number of adjacent nodes in the graph,
 and $d$ be the maximum depth, that is $z(v_{src},t_{max})$ (there could be nodes with higher values of $z$, but a reasonable player would not visit those nodes).
 
-The algorithm~\ref*{alg:RCSP} has to fill a table of dimentions $|V| \times t_{max}$.
+The algorithm~\ref*{alg:RCSP} has to fill a table of dimensions $|V| \times t_{max}$.
 For each cell, it must check on average $b$ adjacent nodes.
 Therefore, the computational complexity is $O(|V| \cdot b \cdot t_{max})$, whereas the space complexity will be $O(|V| \cdot t_{max})$.
-However, an important thing to remember is that this algorithm needs to run only once, at the beggining of the game.
+However, an important thing to remember is that this algorithm needs to run only once, at the beginning of the game.
 
 Algorithm~\ref{alg:viable_next_moves} is an interesting case.
 Because it is just a filter on the iterator over the neighbourhood, just invoking this function has a complexity of $O(1)$.
@@ -655,7 +655,7 @@ in an optimal setting we can reach $b \cdot 1 \cdot b \cdot 1 \cdots$, which wil
 \section{Testing}
 
 For testing purposes a special graph was prepared, which is shown on fig.~\ref{fig:test-graph}.
-This graph was designed specifically to accomodate special blocking scenarios to see if our algorithms choose a correct path.
+This graph was designed specifically to accommodate special blocking scenarios to see if our algorithms choose a correct path.
 
 \begin{figure}[H]\centering
     \normalsize
@@ -739,14 +739,14 @@ This graph was designed specifically to accomodate special blocking scenarios to
 The first thing we want to check is the correctness of algorithm \ref{alg:RCSP}.
 All of the other algorithms depend on the correctness of the values of $z(a,t)$.
 
-We ran the algortithm against the testing graph and checked the values in the generated table against the expected values.
+We ran the algorithm against the testing graph and checked the values in the generated table against the expected values.
 They produced values were all the same as in the table \ref{tab:test-z-score-expected},
 therefore, we concluded that the algorithm works as expected and was implemented correctly.
 
 \subsection{Testing choice of the path}
 
 The second aspect is analysis of the shortest paths.
-The algrotihm should avoid being blocked by the other player,
+The algorithm should avoid being blocked by the other player,
 while simultaneously trying to block them.
 
 Below is the table illustrating some of the settings that can occur on the board from fig.~\ref{fig:test-graph},
@@ -773,7 +773,7 @@ Below are listed the reasons, for which player $a$ should perform the specified 
     \item $a$ should go to $7$ to block $b$
 \end{enumerate}
 
-All of the tested algrotihms yielded correct results.
+All of the tested algorithms yielded correct results.
 The only time the result was different than the expected value, was in the case 1,
 the minimax algorithm chose node 4 when playing as white, but 3 when playing as black.
 Although we did not expect that, it is actually a perfectly valid result,
