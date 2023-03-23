@@ -2,7 +2,8 @@ import board
 import solver
 import matplotlib.pyplot as plt
 
-json_file = 'pekingExpressTest1.json'
+# json_file = input("Configuration file: ")
+json_file = 'pekingExpressTest5.json'
 # json_file = 'pekingExpressTest2.json'
 
 
@@ -31,8 +32,8 @@ else:
 # print(f"target={board.peking}")
 # print(f"budget={board.budget}")
 
-# board.visualize()
-# plt.show()
+board.visualize()
+plt.show()
 
 while not winner:
     print(f"Computer position { board.computer_pos } and budget { board.computer_budget }")
@@ -44,22 +45,23 @@ while not winner:
         print("~~~~~~~~~~ Tie! ~~~~~~~~~~")
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~")
         break
+    # Does not have to check who starts, because computer always moves after player, so if player is already in 88 computer gets last chance for tie
     elif board.player_already_at_88 == 1:
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print("~~~~~~ You have won! ~~~~~~")
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         break
-    elif board.computer_already_at_88 == 2:
+    elif board.computer_already_at_88 == 2 or (board.computer_already_at_88 == 1 and board.white_is_player):
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print("~~~~~~ You have lost! ~~~~~~")
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         break
     # If player does not win and has no budget then he loses
-    elif board.player_budget <= 0:
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print("~~~~ You do not have money! ~~~~")
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        break
+    # elif board.player_budget <= 0:
+    #     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    #     print("~~~~ You do not have money! ~~~~")
+    #     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    #     break
     # If player does not win or lose he still playes 
     else:
         print("Your possibe moves: ")

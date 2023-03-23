@@ -1,0 +1,13 @@
+{
+    "locations": {
+        "number": 6,
+        "critical": [3]
+     },
+    "roads": {
+        "source":   [1, 2, 3, 3, 4, 5, 1],
+        "target":   [2, 3, 4, 5, 88, 88, 1],
+        "price":    [1, 1, 1, 1, 1, 1, 5]
+     },
+    "startLocation": 1,
+    "budget": 5
+}
