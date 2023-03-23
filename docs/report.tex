@@ -242,6 +242,7 @@ The following algorithm accomplishes exactly that:
         }
     }
     \caption{Algorithm to fill the table of $z_n(a,t)$}
+    \label{alg:RCSP}
 \end{algorithm}
 
 \subsection{Generating the shortest paths}
@@ -439,17 +440,17 @@ The result of this is shown on fig.~\ref{fig:minimax-full}.
     \begin{subfigure}[ht]{0.4\textwidth}
         \Tree [
             .$\max$
-            [.$\min$ [.$\max$ -2 5 ] [.$\max$ 1 -3 ] ]
-                [.$\min$ [.$\max$  4 1 ] [.$\max$  2 0 ] ]
+            [.$\min$ [.$\max$ -4 5 ] [.$\max$ 7 10 ] ]
+                [.$\min$ [.$\max$ -1 2 ] [.$\max$ 0 -3 ] ]
         ]
         \caption{}
         \label{fig:minimax-empty}
     \end{subfigure}
     \begin{subfigure}[ht]{0.4\textwidth}
         \Tree [
-            .2
-                [.1 [.5 -2 5 ] [.1 1 -3 ] ]
-                [.2 [.4  4 1 ] [.2  2 0 ] ]
+            .5
+                [.5 [.5 -4 5 ] [.10 7 10 ] ]
+                [.0 [.2 -1 2 ] [.0 0 -3 ] ]
         ]
         \caption{}
         \label{fig:minimax-full}
@@ -518,7 +519,109 @@ we can use a popular minimax algorithm, which looks the following:
     \label{alg:minimax_basic}
 \end{algorithm}
 
+\subsubsection{Alpha-beta pruning}
+
+The minimax algorithm checks every possible move for every possible player,
+however, some of them do not need to be evaluated.
+Due to the characteristics of the min and max functions, with only 1 value, we can determine the upper or lower bound of the result.
+For example if we calculate $\max(2, \ldots)$, we can be sure that the result will be at least 2, without having to compute any of the other values.
+If this bound is worse than what the parent node can choose, we need not evaluate other child branches, because we can be sure that the parent node will not choose this branch.
+
+An illustration of this process is shown on fig.~\ref{fig:minimax-ab-full}.
+The dots indicate subtrees that we do not need to evaluate.
+
+\begin{figure}[H]\centering
+    \begin{subfigure}[ht]{0.4\textwidth}
+        \Tree [
+            .$\max$
+            [.$\min$ [.$\max$ -4 5 ] [.$\max$ 7 10 ] ]
+                [.$\min$ [.$\max$ -1 2 ] [.$\max$ 0 -3 ] ]
+        ]
+        \caption{}
+        \label{fig:minimax-ab-empty}
+    \end{subfigure}
+    \begin{subfigure}[ht]{0.4\textwidth}
+        \Tree [
+            .5
+                [.5 [.5 -4 5 ] [.$\geq 7$ 7 $\ldots$ ] ]
+                [.$\leq 2$ [.2 -1 2 ] $\ldots$ ]
+        ]
+        \caption{}
+        \label{fig:minimax-ab-full}
+    \end{subfigure}
+    \caption{Illustration of alpha-beta pruning}
+    \label{fig:minimax-ab-visualisation}
+\end{figure}
+
+On the left-hand side that one of the nodes will have the value of at least seven.
+It's parent node has to choose the minimum of 5 or something at least 7.
+Therefore, we can be sure that it will choose 5, and we do not have to evaluate any of the child nodes.
+
+Similar situation occurs on the right hand side, where now we have an upper bound of 2.
+The parent chooses the maximum from 5 or at most 2, therefore 5 is guaranteed to be a better choice and we need not evaluate any more subtrees.
+
+\vfill
+To implement it into the algorithm,
+we need 2 additional parameters --- $\alpha$ and $\beta$.
+The $\alpha$ will denote the current maximum choice the parent has,
+and $\beta$ the minimal choice the parent has.
+
+If we are evaluating the move of the maximizing player, that means that the parent is the minimizing player.
+Therefore, if our current maximum evaluation is greater than $\beta$, that means that the parent has a better choice elsewhere, and we do not need to evaluate any more subtrees.
+
+\pagebreak[3]
+Analogously, if we are evaluating the move of the minimizing player, the parent is the maximizing player.
+If the current minimal evaluation is lower than $\alpha$, that means that the parent will not choose this node, so we can stop checking any of the child nodes.
+
+This addition will transform algorithm \ref{alg:minimax_basic} into the following:
+
+\begin{algorithm}[H]
+    \DontPrintSemicolon
+    \SetKwFunction{Fminimax}{minimax}
+    \SetKwFunction{Fmin}{min}
+    \SetKwFunction{Fmax}{max}
+    \SetKwData{false}{FALSE}
+    \SetKwData{true}{TRUE}
+    \SetDataSty{ttfamily}
+    \SetKw{KwBreak}{break}
+    \SetKwProg{Fn}{function}{:}{}
+    \Fn{\Fminimax{position, depth, $\alpha$, $\beta$, maximizingPlayer}}{
+        \If{$depth = 0$ or game over in position} {
+            \KwRet{static evaluation of position}
+        }
+        \uIf{maximizingPlayer}{
+            $maxEval \longleftarrow -\infty$\;
+            \ForEach{next position}{
+                $eval \longleftarrow$ \Fminimax{next, $depth - 1$, $\alpha$, $\beta$, \false}\;
+                $maxEval \longleftarrow$ \Fmax{eval, maxEval}\;
+                $\alpha \longleftarrow$ \Fmax{$\alpha$, maxEval}\;
+                \If{$maxEval \geq \beta$}{
+                    \KwBreak \tcc*[f]{$\beta$ cutoff}
+                }
+            }
+            \KwRet{$maxEval$}\;
+        }\Else(\tcc*[f]{minimizing player}){
+            $minEval \longleftarrow \infty$\;
+            \ForEach{next position}{
+                $eval \longleftarrow$ \Fminimax{next, $depth - 1$,\true}\;
+                $minEval \longleftarrow$ \Fmin{eval, maxEval}\;
+                $\beta \longleftarrow$ \Fmin{eval, minEval}\;
+                \If{$minEval \leq \alpha$}{
+                    \KwBreak \tcc*[f]{$\alpha$ cutoff}
+                }
+            }
+            \KwRet{$minEval$}\;
+        }
+    }
+    \caption{Minimax algorithm with alpha-beta pruning}
+    \label{alg:minimax_ab_pruning}
+\end{algorithm}
+
+\clearpage
 \section{Testing}
+
+For testing purposes a special graph was prepared, which is shown on fig.~\ref{fig:test-graph}.
+This graph was designed specifically to accomodate special blocking scenarios to see if our algorithms choose a correct path.
 
 \begin{figure}[H]\centering
     \normalsize
@@ -571,7 +674,10 @@ we can use a popular minimax algorithm, which looks the following:
     \label{fig:test-graph}
 \end{figure}
 
-\begin{table}[H]\centering
+\subsection{Testing \texorpdfstring{$z$}{\textit{z}} scores}
+
+\begin{table}[h]\centering
+    \scriptsize
     \begin{tabular}{|c|cccccccc|}
         \hline
            & 0        & 1        & 2        & 3        & 4        & 5 & 6 & 7 \\ \hline
@@ -593,20 +699,39 @@ we can use a popular minimax algorithm, which looks the following:
         \hline
     \end{tabular}
     \caption{Expected $z$ table of graph from fig.~\ref*{fig:test-graph}}
+    \label{tab:test-z-score-expected}
 \end{table}
 
-\begin{table}[H]\centering
+The first thing we want to check is the correctness of algorithm \ref{alg:RCSP}.
+All of the other algorithms depend on the correctness of the values of $z(a,t)$.
+
+We ran the algortithm against the testing graph and checked the values in the generated table against the expected values.
+They produced values were all the same as in the table \ref{tab:test-z-score-expected},
+therefore, we concluded that the algorithm works as expected and was implemented correctly.
+
+\subsection{Testing choice of the path}
+
+The second aspect is analysis of the shortest paths.
+The algrotihm should avoid being blocked by the other player,
+while simultaneously trying to block them.
+
+Below is the table illustrating some of the settings that can occur on the board from fig.~\ref{fig:test-graph},
+and the move that we expect player $a$ to make, under the assumption that they move first.
+
+\begin{table}[h]\centering
     \begin{tabular}{c|cccc|c}
         \toprule
         No & $v_a$ & $t_a$ & $v_b$ & $t_b$ & expected move of $a$ \\ \midrule
         1  & 1     & 7     & 2     & 7     & 4                    \\
         2  & 1     & 6     & 5     & 5     & 3                    \\
-        3  & 1     & 6     & 5     & 4     & 4                    \\
+        3  & 1     & 6     & 5     & 4     & 4 or 3               \\
         4  & 5     & 4     & 4     & 5     & 7                    \\
         \bottomrule
     \end{tabular}
+    \caption{Example test settings and an expected next move}
 \end{table}
 
+Below are listed the reasons, for which player $a$ should perform the specified move.
 \begin{enumerate}
     \item $a$ should choose 4 to block $b$
     \item $a$ should choose 3 to avoid block by $b$
