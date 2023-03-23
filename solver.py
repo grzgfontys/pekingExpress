@@ -102,6 +102,16 @@ class Solver:
         else:
             return 88
 
+    def choose_nex_move_minimax(self):
+        pos_a = self.board.computer_pos
+        budget_a = self.board.computer_budget
+        pos_b = self.board.player_pos
+        budget_b = self.board.player_budget
+        a_is_white = not self.board.white_is_player
+
+        _, move = self.minimax(pos_a, budget_a, pos_b, budget_b, a_is_white, depth=sys.maxsize, playing_a=True)
+        return move
+
     def __game_over_score(self, pos_a, budget_a, pos_b, budget_b, a_is_white):
         target = self.board.peking
         if pos_a != target and pos_b != target:
