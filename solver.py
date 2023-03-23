@@ -109,7 +109,8 @@ class Solver:
         budget_b = self.board.player_budget
         a_is_white = not self.board.white_is_player
 
-        _, move = self.minimax(pos_a, budget_a, pos_b, budget_b, a_is_white, depth=sys.maxsize, playing_a=True)
+        _, move = self.minimax(pos_a, budget_a, pos_b, budget_b, a_is_white, alpha=-sys.maxsize, beta=sys.maxsize,
+                               depth=sys.maxsize, playing_a=True)
         return move
 
     def __game_over_score(self, pos_a, budget_a, pos_b, budget_b, a_is_white):
@@ -135,7 +136,7 @@ class Solver:
                 else:
                     return -sys.maxsize  # white wins
 
-    def minimax(self, pos_a, budget_a, pos_b, budget_b, a_is_white, depth, playing_a):
+    def minimax(self, pos_a, budget_a, pos_b, budget_b, a_is_white, alpha, beta, depth, playing_a):
         static_eval = self.__game_over_score(
             pos_a, budget_a, pos_b, budget_b, a_is_white)
         if static_eval is not None:
@@ -150,10 +151,13 @@ class Solver:
                     continue  # not viable after all
                 new_budget = budget_a - self.board.cost(pos_a, next_pos)
                 score, _ = self.minimax(
-                    next_pos, new_budget, pos_b, budget_b, a_is_white, depth - 1, False)
+                    next_pos, new_budget, pos_b, budget_b, a_is_white, alpha, beta, depth - 1, False)
                 if score > max_score:
                     max_score = score
                     best_move = next_pos
+                alpha = max(alpha, max_score)
+                if max_score >= beta:
+                    break
             return max_score, best_move
         else:  # minimizing
             min_score, best_move = sys.maxsize, None
@@ -162,10 +166,13 @@ class Solver:
                     continue  # not viable after all
                 new_budget = budget_b - self.board.cost(pos_b, next_pos)
                 score, _ = self.minimax(
-                    pos_a, budget_a, next_pos, new_budget, a_is_white, depth - 1, True)
+                    pos_a, budget_a, next_pos, new_budget, a_is_white, alpha, beta, depth - 1, True)
                 if score < min_score:
                     min_score = score
                     best_move = next_pos
+                beta = min(beta, min_score)
+                if min_score <= alpha:
+                    break
             return min_score, best_move
 
     def __create_z(self):
