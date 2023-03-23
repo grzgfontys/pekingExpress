@@ -75,11 +75,12 @@ class Solver:
         assert best_path is not None
         return best_path
 
+    # player A is first to move
     def choose_next_move_defensive(self):
-        pos_b = self.board.player_pos
-        budget_b = self.board.computer_budget
         pos_a = self.board.computer_pos
         budget_a = self.board.player_budget
+        pos_b = self.board.player_pos
+        budget_b = self.board.computer_budget
 
         a_paths = self.shortest_paths(pos_a, budget_a)
         available_a_paths = (
@@ -88,7 +89,10 @@ class Solver:
         best_path = self.defensive_strategy(a_paths, b_paths)
 
         # the first is pos_a, so we return the second node
-        return best_path[1]
+        if len(best_path) > 1:
+            return best_path[1]
+        else:
+            return 88
 
     def __game_over_score(self, pos_a, budget_a, pos_b, budget_b, a_is_white):
         target = self.board.peking

@@ -2,7 +2,7 @@ import board
 import solver
 import matplotlib.pyplot as plt
 
-json_file = 'pekingExpressTest1.json'
+json_file = 'pekingExpressTest3.json'
 # json_file = 'pekingExpressTest2.json'
 
 
@@ -34,25 +34,31 @@ else:
 # board.visualize()
 # plt.show()
 
-
-
-print([p for p in solver.shortest_paths(1, 3)])
-
 while not winner:
     print(f"Computer position { board.computer_pos } and budget { board.computer_budget }")
     print(f"Your position { board.player_pos } and budget { board.player_budget }")
 
     # Player wins
-    if board.player_pos == 88:
+    if board.player_pos == 88 and board.computer_pos == 88:
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print("~~~~~~~~~~ Tie! ~~~~~~~~~~")
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        break
+    elif board.player_already_at_88 == 2:
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print("~~~~~~ You have won! ~~~~~~")
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         break
-    # If player does not win and has no budget then he loses
-    elif board.player_budget <= 0 or (board.white_is_player and board.computer_pos == 88):
+    elif board.computer_already_at_88 == 2:
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print("~~~~~~ You have lost! ~~~~~~")
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        break
+    # If player does not win and has no budget then he loses
+    elif board.player_budget <= 0:
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print("~~~~ You do not have money! ~~~~")
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         break
     # If player does not win or lose he still playes 
     else:
@@ -79,5 +85,9 @@ while not winner:
 
         board.player_pos = next_move
         board.player_budget -= possible_moves[next_move]
+        if next_move == 88:
+            board.player_already_at_88 += 1
         print("~~~~~~")
         board.update_computer_pos(solver.choose_next_move_defensive())
+        if board.computer_pos == 88:
+            board.computer_already_at_88 += 1

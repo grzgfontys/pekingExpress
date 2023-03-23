@@ -18,6 +18,7 @@ class Board:
         self.maxNodeNumber = (self.peking if self.peking > self.locationNumber else self.locationNumber) + 1
         self.computer_pos, self.player_pos = self.start_node, self.start_node
         self.computer_budget, self.player_budget = self.starting_budget, self.starting_budget
+        self.computer_already_at_88, self.player_already_at_88 = 0, 0
         self.white_is_player = white_is_player
 
         # initialize graph
