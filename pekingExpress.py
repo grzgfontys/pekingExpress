@@ -68,6 +68,7 @@ while not winner:
         possible_moves = board.possibleMovesPlayer()
         for nbr in possible_moves.keys():
             print(f"- Move to { nbr } with cost of { possible_moves[nbr] }")
+        print("- Type '0' to stay in place")
 
         print("---")
 
@@ -76,15 +77,15 @@ while not winner:
         except:
             next_move = None
 
-        while next_move not in possible_moves.keys():
+        while next_move not in possible_moves.keys() and next_move != 0:
             print("This is not correct move!")
             try:
                 next_move = int(input("Your next move: "))
             except:
                 continue
-
-        board.player_pos = next_move
-        board.player_budget -= possible_moves[next_move]
+        if next_move != 0:
+            board.player_pos = next_move
+            board.player_budget -= possible_moves[next_move]
         if next_move == 88:
             board.player_already_at_88 += 1
         print("~~~~~~")
