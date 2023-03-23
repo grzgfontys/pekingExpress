@@ -2,7 +2,7 @@ import board
 import solver
 import matplotlib.pyplot as plt
 
-json_file = 'pekingExpressTest3.json'
+json_file = 'pekingExpressTest1.json'
 # json_file = 'pekingExpressTest2.json'
 
 
@@ -86,7 +86,7 @@ while not winner:
         if next_move != 0:
             board.player_pos = next_move
             board.player_budget -= possible_moves[next_move]
-        if next_move == 88:
+        if board.player_pos == 88:
             board.player_already_at_88 += 1
         print("~~~~~~")
         board.update_computer_pos(solver.choose_next_move_defensive())
