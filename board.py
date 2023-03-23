@@ -1,16 +1,14 @@
-import sys
 import json
 import networkx as nx
-import matplotlib.pyplot as plt
-from collections import deque
 
 
 class Board:
-    def __init__(self, json_file):
+    def __init__(self, json_file, white_is_player: bool):
         # load the json data
         with open(json_file) as f:
             board = json.load(f)
 
+        # Attributes storing game data
         road_data = board["roads"]
         self.locationNumber = board["locations"]["number"]
         self.critical_locations = board["locations"]["critical"]
@@ -20,6 +18,7 @@ class Board:
         self.maxNodeNumber = (self.peking if self.peking > self.locationNumber else self.locationNumber) + 1
         self.computer_pos, self.player_pos = self.start_node, self.start_node
         self.computer_budget, self.player_budget = self.starting_budget, self.starting_budget
+        self.white_is_player = white_is_player
 
         # initialize graph
         self.graph = nx.DiGraph()
@@ -27,18 +26,20 @@ class Board:
             (dst, cost) = (road_data["target"][i], road_data["price"][i])
             self.graph.add_edge(src, dst, cost=cost)
 
+        # Add critical labels to the nodes
         for node in self.graph.nodes():
             self.graph.nodes[node]["critical"] = False
-
         for critical in self.critical_locations:
             self.graph.nodes[critical]["critical"] = True
 
+        # Make graph undirected
         self.graph = self.graph.to_undirected()
 
+    # Cost of travel between two nodes
     def cost(self, src, dst):
         return self.graph.edges[src, dst]['cost']
 
-
+    # Possible moves for player position
     def possibleMovesPlayer(self):
         moves = dict()
 
@@ -52,6 +53,7 @@ class Board:
 
         return moves
 
+    # Possible moves for computer position
     def possibleMoves(self, src):
         moves = []
 
@@ -59,7 +61,15 @@ class Board:
             moves.append((nbr, datadict["cost"]))
 
         return moves
+    
+    def update_computer_pos(self, new_pos):
+        for nbr, cost in self.possibleMoves(self.computer_pos):
+            if nbr == new_pos:
+                self.computer_budget -= cost
+                self.computer_pos = new_pos
+                break
 
+    # Visualization of graph game/board using networkx
     def visualize(self):
         layout = nx.spring_layout(self.graph, seed=2137)
         nx.draw_networkx_nodes(self.graph, layout)

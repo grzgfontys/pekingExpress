@@ -62,39 +62,10 @@ class Solver:
             if new_distance < current_distance:
                 yield b
 
-    def minimax(self, pos_a, budget_a, pos_b, budget_b, a_is_white, depth, playing_a):
-        static_eval = self.__game_over_score(pos_a, budget_a, pos_b, budget_b, a_is_white)
-        if static_eval is not None:
-            return static_eval, (pos_a if playing_a else pos_b)
-        if depth == 0:
-            # heuristic
-            return (self.z(pos_b, budget_b) - self.z(pos_a, budget_a)), (pos_a if playing_a else pos_b)
-        if playing_a:  # maximizing
-            max_score, best_move = -sys.maxsize, None
-            for next_pos in self.viable_moves(pos_a, budget_a):
-                if next_pos in self.board.critical_locations and next_pos == pos_b:
-                    continue  # not viable after all
-                new_budget = budget_a - self.board.cost(pos_a, next_pos)
-                score, _ = self.minimax(next_pos, new_budget, pos_b, budget_b, a_is_white, depth - 1, False)
-                if score > max_score:
-                    max_score = score
-                    best_move = next_pos
-            return max_score, best_move
-        else:  # minimizing
-            min_score, best_move = sys.maxsize, None
-            for next_pos in self.viable_moves(pos_b, budget_b):
-                if next_pos in self.board.critical_locations and next_pos == pos_a:
-                    continue  # not viable after all
-                new_budget = budget_b - self.board.cost(pos_b, next_pos)
-                score, _ = self.minimax(pos_a, budget_a, next_pos, new_budget, a_is_white, depth - 1, True)
-                if score < min_score:
-                    min_score = score
-                    best_move = next_pos
-            return min_score, best_move
-
     def defensive_strategy(self, a_paths, b_paths):
         """chooses the path from a that minimizes chance of getting blocked by b and maximizes chances of blocking b"""
-        b_paths = list(b_paths)  # convert to list to prevent multiple enumerations of a generator
+        b_paths = list(
+            b_paths)  # convert to list to prevent multiple enumerations of a generator
         blocked_min, blocking_max, best_path = sys.maxsize, 0, None
         for a in a_paths:
             blocking, blocked = self.blocking_scores(a, b_paths)
@@ -104,9 +75,15 @@ class Solver:
         assert best_path is not None
         return best_path
 
-    def choose_next_move_defensive(self, pos_a, budget_a, pos_b, budget_b):
+    def choose_next_move_defensive(self):
+        pos_b = self.board.player_pos
+        budget_b = self.board.computer_budget
+        pos_a = self.board.computer_pos
+        budget_a = self.board.player_budget
+
         a_paths = self.shortest_paths(pos_a, budget_a)
-        available_a_paths = (p for p in a_paths if p[1] != pos_b or p[1] not in self.board.critical_locations)
+        available_a_paths = (
+            p for p in a_paths if p[1] != pos_b or p[1] not in self.board.critical_locations)
         b_paths = self.shortest_paths(pos_b, budget_b)
         best_path = self.defensive_strategy(a_paths, b_paths)
 
@@ -135,6 +112,39 @@ class Solver:
                     return 0  # a can reach target just after white, tie
                 else:
                     return -sys.maxsize  # white wins
+
+    def minimax(self, pos_a, budget_a, pos_b, budget_b, a_is_white, depth, playing_a):
+        static_eval = self.__game_over_score(
+            pos_a, budget_a, pos_b, budget_b, a_is_white)
+        if static_eval is not None:
+            return static_eval, (pos_a if playing_a else pos_b)
+        if depth == 0:
+            # heuristic
+            return (self.z(pos_b, budget_b) - self.z(pos_a, budget_a)), (pos_a if playing_a else pos_b)
+        if playing_a:  # maximizing
+            max_score, best_move = -sys.maxsize, None
+            for next_pos in self.viable_moves(pos_a, budget_a):
+                if next_pos in self.board.critical_locations and next_pos == pos_b:
+                    continue  # not viable after all
+                new_budget = budget_a - self.board.cost(pos_a, next_pos)
+                score, _ = self.minimax(
+                    next_pos, new_budget, pos_b, budget_b, a_is_white, depth - 1, False)
+                if score > max_score:
+                    max_score = score
+                    best_move = next_pos
+            return max_score, best_move
+        else:  # minimizing
+            min_score, best_move = sys.maxsize, None
+            for next_pos in self.viable_moves(pos_b, budget_b):
+                if next_pos in self.board.critical_locations and next_pos == pos_a:
+                    continue  # not viable after all
+                new_budget = budget_b - self.board.cost(pos_b, next_pos)
+                score, _ = self.minimax(
+                    pos_a, budget_a, next_pos, new_budget, a_is_white, depth - 1, True)
+                if score < min_score:
+                    min_score = score
+                    best_move = next_pos
+            return min_score, best_move
 
     def __create_z(self):
         z = dict()

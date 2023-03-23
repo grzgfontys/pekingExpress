@@ -5,7 +5,24 @@ import matplotlib.pyplot as plt
 json_file = 'pekingExpressTest1.json'
 # json_file = 'pekingExpressTest2.json'
 
-board = board.Board(json_file)
+
+
+winner = False
+who_starts = input("Does the player start? y/n")
+# who_starts = 'y'
+while who_starts != 'y' and who_starts != 'n':
+    print("This is not correct answer!")
+    who_starts = input("Does the player start? y/n")
+if who_starts == 'y':
+    board = board.Board(json_file, True)
+    solver = solver.Solver(board)
+else:
+    board = board.Board(json_file, False)
+    solver = solver.Solver(board)
+    board.update_computer_pos(solver.choose_next_move_defensive())
+
+
+
 
 # print(f"nodes={board.graph.nodes}")
 # print(f"edges={board.graph.edges}")
@@ -17,15 +34,12 @@ board = board.Board(json_file)
 # board.visualize()
 # plt.show()
 
-solver = solver.Solver(board)
-
-
-winner = False
 
 
 print([p for p in solver.shortest_paths(1, 3)])
 
 while not winner:
+    print(f"Computer position { board.computer_pos } and budget { board.computer_budget }")
     print(f"Your position { board.player_pos } and budget { board.player_budget }")
 
     # Player wins
@@ -35,7 +49,7 @@ while not winner:
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         break
     # If player does not win and has no budget then he loses
-    elif board.player_budget <= 0:
+    elif board.player_budget <= 0 or (board.white_is_player and board.computer_pos == 88):
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print("~~~~~~ You have lost! ~~~~~~")
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -51,7 +65,19 @@ while not winner:
 
         print("---")
 
-        next_move = int(input("Your next move: "))
+        try:
+            next_move = int(input("Your next move: "))
+        except:
+            next_move = None
+
+        while next_move not in possible_moves.keys():
+            print("This is not correct move!")
+            try:
+                next_move = int(input("Your next move: "))
+            except:
+                continue
+
         board.player_pos = next_move
         board.player_budget -= possible_moves[next_move]
         print("~~~~~~")
+        board.update_computer_pos(solver.choose_next_move_defensive())
