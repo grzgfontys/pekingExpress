@@ -618,6 +618,40 @@ This addition will transform algorithm \ref{alg:minimax_basic} into the followin
 \end{algorithm}
 
 \clearpage
+\section{Complexity analysis}
+
+Let $b$ denote the average number of adjacent nodes in the graph,
+and $d$ be the maximum depth, that is $z(v_{src},t_{max})$ (there could be nodes with higher values of $z$, but a reasonable player would not visit those nodes).
+
+The algorithm~\ref*{alg:RCSP} has to fill a table of dimentions $|V| \times t_{max}$.
+For each cell, it must check on average $b$ adjacent nodes.
+Therefore, the computational complexity is $O(|V| \cdot b \cdot t_{max})$, whereas the space complexity will be $O(|V| \cdot t_{max})$.
+However, an important thing to remember is that this algorithm needs to run only once, at the beggining of the game.
+
+Algorithm~\ref{alg:viable_next_moves} is an interesting case.
+Because it is just a filter on the iterator over the neighbourhood, just invoking this function has a complexity of $O(1)$.
+Only when it is enumerated will it have the average complexity of $O(b)$.
+
+Algorithm~\ref{alg:shortest_paths} has to generate a 
+tree of depth linearly proportional to $d$, 
+with each layer branching to $b$ branches on average.
+Therefore, total complexity is $O(b^d)$
+
+Algorithm~\ref{alg:paths_blocking} is a linear search on the length of the path.
+Therefore, the total complexity of the choosing the path based on blocking analysis.
+It checks all paths of $a$, and for every path of $a$ checks every path of $b$.
+Each check is linear search of complexity $O(z)$
+Therefore, the total complexity will be $O(b^d \cdot b^d \cdot z)$, which is $O(z \cdot b^{2d})$.
+
+As for the naive minimax, it also enumerates all of the possible paths of $a$ and $b$,
+but it does not need to perform linear searches on them.
+Therefore, the total complexity is $O(b^{2d})$
+
+Addition of alpha-beta pruning can drastically reduce the complexity.
+Instead of performing $b \cdot b \cdot b \cdot b \cdots$ computations,
+in an optimal setting we can reach $b \cdot 1 \cdot b \cdot 1 \cdots$, which will result in a complexity of $O(\sqrt{b^{2n}})$.
+
+\clearpage
 \section{Testing}
 
 For testing purposes a special graph was prepared, which is shown on fig.~\ref{fig:test-graph}.
@@ -738,5 +772,13 @@ Below are listed the reasons, for which player $a$ should perform the specified 
     \item $a$ can go to 4, because $b$ will not reach target from $7$
     \item $a$ should go to $7$ to block $b$
 \end{enumerate}
+
+All of the tested algrotihms yielded correct results.
+The only time the result was different than the expected value, was in the case 1,
+the minimax algorithm chose node 4 when playing as white, but 3 when playing as black.
+Although we did not expect that, it is actually a perfectly valid result,
+because the player does not need to block the other one,
+because if black reached the target first, they automatically win.
+However, if the player was white, then choosing 3 would result in a tie, so the algorithm correctly chooses to go to 4 to block the other player.
 
 \end{document}
