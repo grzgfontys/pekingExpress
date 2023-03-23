@@ -64,6 +64,8 @@ class Board:
         return moves
     
     def update_computer_pos(self, new_pos):
+        if new_pos == None:
+            return
         for nbr, cost in self.possibleMoves(self.computer_pos):
             if nbr == new_pos:
                 self.computer_budget -= cost

@@ -44,7 +44,7 @@ while not winner:
         print("~~~~~~~~~~ Tie! ~~~~~~~~~~")
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~")
         break
-    elif board.player_already_at_88 == 2:
+    elif board.player_already_at_88 == 1:
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print("~~~~~~ You have won! ~~~~~~")
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~")

@@ -32,6 +32,8 @@ class Solver:
     def blocking_cmp(self, a, b):
         """ compares paths a and b with regard to blocking
         returns 0 if there are no blocks, positive value if a blocks b, and negative value if b blocks a """
+        if self.board.player_pos == 88:
+            return 0
         critical_locations = self.board.critical_locations
         for i in range(len(a)):
             if a[i] in critical_locations:
@@ -72,23 +74,29 @@ class Solver:
             if blocked < blocked_min or (blocked == blocked_min and blocking > blocking_max):
                 blocked_min, blocking_max, best_path = blocked, blocking, a
 
-        assert best_path is not None
         return best_path
 
     # player A is first to move
     def choose_next_move_defensive(self):
+        if self.board.computer_pos == 88:
+            return None
         pos_a = self.board.computer_pos
-        budget_a = self.board.player_budget
+        budget_a = self.board.computer_budget
         pos_b = self.board.player_pos
-        budget_b = self.board.computer_budget
+        budget_b = self.board.player_budget
 
         a_paths = self.shortest_paths(pos_a, budget_a)
+        # a1 = list(a_paths)
         available_a_paths = (
             p for p in a_paths if p[1] != pos_b or p[1] not in self.board.critical_locations)
+        # a2 = list(available_a_paths)
         b_paths = self.shortest_paths(pos_b, budget_b)
-        best_path = self.defensive_strategy(a_paths, b_paths)
+        # b = list(b_paths)
+        best_path = self.defensive_strategy(available_a_paths, b_paths)
 
         # the first is pos_a, so we return the second node
+        if best_path is None:
+            return None
         if len(best_path) > 1:
             return best_path[1]
         else:
