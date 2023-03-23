@@ -9,6 +9,7 @@
 \usepackage{amssymb}
 \usepackage{array}
 \usepackage{qtree}
+\usepackage{booktabs}
 \usepackage[ruled, vlined]{algorithm2e}
 
 \DeclareMathOperator*{\bigforall}{\mbox{\Large $\mathsurround0pt \forall$}}
@@ -47,13 +48,13 @@
 
 \section{Introduction}
 
-In the game 2 players take turns traversing a directed weighted graph.
+In the game 2 players take turns traversing a weighted graph.
 One vertex is chosen as a destination and the aim of the game is to be the first player to reach that vertex.
 
 Each player starts with the same budget --- every vertex has an associated travel cost, and each time a player traverses that edge, their budget decreases by that amount.
 Players can only traverse an edge if their current budget is higher than the cost associated with that edge.
 
-Additionally, some of the graph's vertices are \emph{critical locations}, meaning that they can only accomodate one player at a time.
+Additionally, some of the graph's vertices are \emph{critical locations}, meaning that they can only accommodate one player at a time.
 
 An example map is shown on the fig.~\ref*{fig:example-map} below.
 The start location is node $A$, marked in green, the target is node $D$ shown in red,
@@ -66,11 +67,11 @@ and the critical locations are marked with a double border, in this case only on
         \node[main] (b) at (3,3) {$B$};
         \node[main, fill=red] (d) at (6,1.5) {$D$};
 
-        \draw[-latex, thick] (a) -- (b) node[midway, above] {1};
-        \draw[latex-latex, thick] (b) -- (c) node[midway, below right] {1};
-        \draw[-latex, thick] (a) -- (c) node[midway, below] {3};
-        \draw[-latex, thick] (a) -- (d) node[pos=0.7, above] {7};
-        \draw[-latex, thick] (c) -- (d) node[midway, below] {1};
+        \draw[thick] (a) -- (b) node[midway, above] {1};
+        \draw[thick] (b) -- (c) node[midway, below right] {1};
+        \draw[thick] (a) -- (c) node[midway, below] {3};
+        \draw[thick] (a) -- (d) node[pos=0.7, above] {7};
+        \draw[thick] (c) -- (d) node[midway, below] {1};
     \end{tikzpicture}
     \caption{Example map for the game with the source marked green and the target shown as red.}
     \label{fig:example-map}
@@ -109,7 +110,7 @@ For all $p \in P$ define the functions $C: P \to \mathbb{Z}^+$, and $R: P \to \m
 \end{align}
 
 The aim of the game is to reach the target in the shortest amount of moves while staying within the budget.
-Therefore, we want to find such $p \in P(\source,\target)$ that minimizes the value of $C(p)$ while maintaing the condition $R(p) \leq t_{max}$.
+Therefore, we want to find such $p \in P(\source,\target)$ that minimizes the value of $C(p)$ while maintaining the condition $R(p) \leq t_{max}$.
 This is the classic example of a well-known resource-constrained shortest path problem (RCSP).
 
 \subsection{Critical location limitations}
@@ -119,7 +120,7 @@ This is the classic example of a well-known resource-constrained shortest path p
 Now consider 2 simple paths: $p_a = (a_1, \ldots, a_n)$, and $p_b = (b_1, \ldots, b_k)$, where $a_n = b_k = \target$.
 They will denote the shortest path chosen by each player respectively.
 
-Since the critical loactions can only host one player at the time,
+Since the critical locations can only host one player at the time,
 if both of the paths contain some critical location $c$, the players can block each other.
 
 Assume player $a$ moves first.
@@ -136,7 +137,7 @@ This equation is an obvious consequence of the one above it, because after makin
 resulting in situation where the second player will be in a blocking advantage.
 
 Additionally, if both conditions occur,
-the one that occured first has a precedence,
+the one that occurred first has a precedence,
 that is, for some critical $c_1, c_2$:
 \begin{equation}
     \exists i,j : (a_i = b_i = c_1 \land a_j = b_{j-1} = c_2) \implies
@@ -174,7 +175,7 @@ that is, for some critical $c_1, c_2$:
         \draw[ar] (n) -- (b3);
         \draw[ar] (b3) -- (target);
     \end{tikzpicture}
-    \caption{Illurtration of two paths that might block}
+    \caption{Illustration of two paths that might block}
 \end{figure}
 
 
@@ -184,7 +185,7 @@ This problem can be solved in 2 approaches:
 starting from source to all of the nodes reachable from it,
 or starting from the target, to all of the nodes it is reachable from.
 
-Since thrroughout the game the starting positions would stay the same,
+Since throughout the game the starting positions would stay the same,
 but the target node $\target$ will be constant, we will use the second approach.
 
 Let $z(a, t)$ be $\min \{ C(p) \mid p \in P(a,\target), T(p) \leq t \}$.
@@ -230,7 +231,7 @@ The following algorithm accomplishes exactly that:
             $Z[n][t] \longleftarrow 0$\;
             \ForEach{$a \in V, a \neq n$}{
                 $z_{min} \longleftarrow \infty$\;
-                \ForEach{$b \in V$, such that $(a,b) \in E$}{
+                \ForEach{$b$ adjacent to $a$}{
                     \If{$t_{ab} \leq t$}{
                         $z_{new} \longleftarrow Z[b][t - t_{ab}] + 1$\;
                         $z_{min} = \min(z_{min}, z_{new})$
@@ -241,6 +242,7 @@ The following algorithm accomplishes exactly that:
         }
     }
     \caption{Algorithm to fill the table of $z_n(a,t)$}
+    \label{alg:RCSP}
 \end{algorithm}
 
 \subsection{Generating the shortest paths}
@@ -248,7 +250,7 @@ The following algorithm accomplishes exactly that:
 Let $\p(a,t)$ denote a set of all shortest paths from $a$ to $\target$, constrained by maximum resource usage $t$.
 Since all of these paths are the shortest, all of them have the same length equal to $z(a,t)$.
 
-Therefore, the set $\p(a,t)$ can be expressed as a follwing:
+Therefore, the set $\p(a,t)$ can be expressed as a following:
 
 \begin{equation*}
     \p(a,t) = \big\{ p \in P(a,\target) \mid C(p) = z(a,t) \big\}
@@ -375,7 +377,7 @@ and if we still have a choice left, only then tries to maximize the $\blockingSc
 Note that if there exist a path that will with $100\%$ certainty block player $b$,
 which as we established was the only time it is viable to play aggressively, our approach will choose that option.
 
-Note that this algorithm is not guaranteed to result in the totally best result, 
+Note that this algorithm is not guaranteed to result in the totally best result,
 however, supported by the fact that the paths we choose from are already the shortest paths possible,
 and the applied heuristics are only aimed to even further improve the choice, we are satisfied with the result.
 
@@ -417,8 +419,8 @@ The player $b$ on the contrary, he would prefer outcome 3 over 2, and 2 over 1.
 
 We can see that we can clearly form a poset of this outcomes.
 Let's change the numbers a bit and say that the result is $+1$ if $a$ wins, $-1$ if $b$ wins, and 0 in case of a tie.
-It is now clear that if a player is presented with a set of outcomes, 
-player $a$ will try to maximize the outcome, 
+It is now clear that if a player is presented with a set of outcomes,
+player $a$ will try to maximize the outcome,
 while player $b$ will try to minimize it.
 
 This enables us to recursively evaluate any of the available moves.
@@ -428,7 +430,7 @@ This is a well known problem in game theory, very common in turn-based games.
 
 To better visualize the problem, it might be helpful to imagine the possible moves as a tree, like in fig.~\ref{fig:minimax-visualisation}.
 Each of the tree levels represents a player turn, where one player will try to choose the minimum value of its children, while the other one will choose the maximum.
-Therefore, knowing only the end scores, as in fig.~\ref{fig:minimax-empty}, we can calculate the best score one can reach from any position, 
+Therefore, knowing only the end scores, as in fig.~\ref{fig:minimax-empty}, we can calculate the best score one can reach from any position,
 by taking minimum and maximum alternately.
 The result of this is shown on fig.~\ref{fig:minimax-full}.
 
@@ -437,18 +439,18 @@ The result of this is shown on fig.~\ref{fig:minimax-full}.
 \begin{figure}[H]\centering
     \begin{subfigure}[ht]{0.4\textwidth}
         \Tree [
-            .$\max$ 
-            [.$\min$ [.$\max$ -2 5 ] [.$\max$ 1 -3 ] ]
-            [.$\min$ [.$\max$  4 1 ] [.$\max$  2 0 ] ] 
+            .$\max$
+            [.$\min$ [.$\max$ -4 5 ] [.$\max$ 7 10 ] ]
+                [.$\min$ [.$\max$ -1 2 ] [.$\max$ 0 -3 ] ]
         ]
         \caption{}
         \label{fig:minimax-empty}
     \end{subfigure}
     \begin{subfigure}[ht]{0.4\textwidth}
         \Tree [
-            .2 
-            [.1 [.5 -2 5 ] [.1 1 -3 ] ]
-            [.2 [.4  4 1 ] [.2  2 0 ] ] 
+            .5
+                [.5 [.5 -4 5 ] [.10 7 10 ] ]
+                [.0 [.2 -1 2 ] [.0 0 -3 ] ]
         ]
         \caption{}
         \label{fig:minimax-full}
@@ -462,8 +464,8 @@ for performance considerations, we might want to limit the maximum depth.
 This depth will be the number of moves the algorithm examines.
 For example for depth 5, the algorithm will examine every possible position at 5 moves ahead.
 
-For the purpose of limiting the depth, 
-we need to estimate a heuristic for a situation where we reach maximum tree depth 
+For the purpose of limiting the depth,
+we need to estimate a heuristic for a situation where we reach maximum tree depth
 but game has not ended yet.
 A sufficiently good estimate can be made with the table of $z$ values we have calculated.
 We just check the shortest distance of each player to the target vertex and calculate their difference.
@@ -477,11 +479,11 @@ If $h > 0$, player $b$ is closer, and if $h = 0$, they are equally close.
 
 By introducing this heuristic we will again need to modify the evaluation values of end game states ---
 player $a$ will obviously prefer to win, than be 2 edges closer than $b$.
-Therefore, we will leave the tie at 0, 
-but situation when $a$ wins we will assign $+\infty$, 
+Therefore, we will leave the tie at 0,
+but situation when $a$ wins we will assign $+\infty$,
 and when $b$ wins, $-\infty$.
 
-Thanks to this, we can statically evaluate every position, and therefore, 
+Thanks to this, we can statically evaluate every position, and therefore,
 we can use a popular minimax algorithm, which looks the following:
 
 \begin{algorithm}[H]
@@ -500,14 +502,14 @@ we can use a popular minimax algorithm, which looks the following:
         \uIf{maximizingPlayer}{
             $maxEval \longleftarrow -\infty$\;
             \ForEach{next position}{
-                $eval \longleftarrow$ \Fminimax{next, $depth - 1$,\false}\; 
+                $eval \longleftarrow$ \Fminimax{next, $depth - 1$,\false}\;
                 $maxEval \longleftarrow$ \Fmax{eval, maxEval}\;
             }
             \KwRet{$maxEval$}\;
         }\Else(\tcc*[f]{minimizing player}){
             $minEval \longleftarrow \infty$\;
             \ForEach{next position}{
-                $eval \longleftarrow$ \Fminimax{next, $depth - 1$,\true}\; 
+                $eval \longleftarrow$ \Fminimax{next, $depth - 1$,\true}\;
                 $minEval \longleftarrow$ \Fmin{eval, maxEval}\;
             }
             \KwRet{$minEval$}\;
@@ -516,5 +518,267 @@ we can use a popular minimax algorithm, which looks the following:
     \caption{General scheme of minimax algorithm}
     \label{alg:minimax_basic}
 \end{algorithm}
+
+\subsubsection{Alpha-beta pruning}
+
+The minimax algorithm checks every possible move for every possible player,
+however, some of them do not need to be evaluated.
+Due to the characteristics of the min and max functions, with only 1 value, we can determine the upper or lower bound of the result.
+For example if we calculate $\max(2, \ldots)$, we can be sure that the result will be at least 2, without having to compute any of the other values.
+If this bound is worse than what the parent node can choose, we need not evaluate other child branches, because we can be sure that the parent node will not choose this branch.
+
+An illustration of this process is shown on fig.~\ref{fig:minimax-ab-full}.
+The dots indicate subtrees that we do not need to evaluate.
+
+\begin{figure}[H]\centering
+    \begin{subfigure}[ht]{0.4\textwidth}
+        \Tree [
+            .$\max$
+            [.$\min$ [.$\max$ -4 5 ] [.$\max$ 7 10 ] ]
+                [.$\min$ [.$\max$ -1 2 ] [.$\max$ 0 -3 ] ]
+        ]
+        \caption{}
+        \label{fig:minimax-ab-empty}
+    \end{subfigure}
+    \begin{subfigure}[ht]{0.4\textwidth}
+        \Tree [
+            .5
+                [.5 [.5 -4 5 ] [.$\geq 7$ 7 $\ldots$ ] ]
+                [.$\leq 2$ [.2 -1 2 ] $\ldots$ ]
+        ]
+        \caption{}
+        \label{fig:minimax-ab-full}
+    \end{subfigure}
+    \caption{Illustration of alpha-beta pruning}
+    \label{fig:minimax-ab-visualisation}
+\end{figure}
+
+On the left-hand side that one of the nodes will have the value of at least seven.
+It's parent node has to choose the minimum of 5 or something at least 7.
+Therefore, we can be sure that it will choose 5, and we do not have to evaluate any of the child nodes.
+
+Similar situation occurs on the right hand side, where now we have an upper bound of 2.
+The parent chooses the maximum from 5 or at most 2, therefore 5 is guaranteed to be a better choice and we need not evaluate any more subtrees.
+
+\vfill
+To implement it into the algorithm,
+we need 2 additional parameters --- $\alpha$ and $\beta$.
+The $\alpha$ will denote the current maximum choice the parent has,
+and $\beta$ the minimal choice the parent has.
+
+If we are evaluating the move of the maximizing player, that means that the parent is the minimizing player.
+Therefore, if our current maximum evaluation is greater than $\beta$, that means that the parent has a better choice elsewhere, and we do not need to evaluate any more subtrees.
+
+\pagebreak[3]
+Analogously, if we are evaluating the move of the minimizing player, the parent is the maximizing player.
+If the current minimal evaluation is lower than $\alpha$, that means that the parent will not choose this node, so we can stop checking any of the child nodes.
+
+This addition will transform algorithm \ref{alg:minimax_basic} into the following:
+
+\begin{algorithm}[H]
+    \DontPrintSemicolon
+    \SetKwFunction{Fminimax}{minimax}
+    \SetKwFunction{Fmin}{min}
+    \SetKwFunction{Fmax}{max}
+    \SetKwData{false}{FALSE}
+    \SetKwData{true}{TRUE}
+    \SetDataSty{ttfamily}
+    \SetKw{KwBreak}{break}
+    \SetKwProg{Fn}{function}{:}{}
+    \Fn{\Fminimax{position, depth, $\alpha$, $\beta$, maximizingPlayer}}{
+        \If{$depth = 0$ or game over in position} {
+            \KwRet{static evaluation of position}
+        }
+        \uIf{maximizingPlayer}{
+            $maxEval \longleftarrow -\infty$\;
+            \ForEach{next position}{
+                $eval \longleftarrow$ \Fminimax{next, $depth - 1$, $\alpha$, $\beta$, \false}\;
+                $maxEval \longleftarrow$ \Fmax{eval, maxEval}\;
+                $\alpha \longleftarrow$ \Fmax{$\alpha$, maxEval}\;
+                \If{$maxEval \geq \beta$}{
+                    \KwBreak \tcc*[f]{$\beta$ cutoff}
+                }
+            }
+            \KwRet{$maxEval$}\;
+        }\Else(\tcc*[f]{minimizing player}){
+            $minEval \longleftarrow \infty$\;
+            \ForEach{next position}{
+                $eval \longleftarrow$ \Fminimax{next, $depth - 1$,\true}\;
+                $minEval \longleftarrow$ \Fmin{eval, maxEval}\;
+                $\beta \longleftarrow$ \Fmin{eval, minEval}\;
+                \If{$minEval \leq \alpha$}{
+                    \KwBreak \tcc*[f]{$\alpha$ cutoff}
+                }
+            }
+            \KwRet{$minEval$}\;
+        }
+    }
+    \caption{Minimax algorithm with alpha-beta pruning}
+    \label{alg:minimax_ab_pruning}
+\end{algorithm}
+
+\clearpage
+\section{Complexity analysis}
+
+Let $b$ denote the average number of adjacent nodes in the graph,
+and $d$ be the maximum depth, that is $z(v_{src},t_{max})$ (there could be nodes with higher values of $z$, but a reasonable player would not visit those nodes).
+
+The algorithm~\ref*{alg:RCSP} has to fill a table of dimensions $|V| \times t_{max}$.
+For each cell, it must check on average $b$ adjacent nodes.
+Therefore, the computational complexity is $O(|V| \cdot b \cdot t_{max})$, whereas the space complexity will be $O(|V| \cdot t_{max})$.
+However, an important thing to remember is that this algorithm needs to run only once, at the beginning of the game.
+
+Algorithm~\ref{alg:viable_next_moves} is an interesting case.
+Because it is just a filter on the iterator over the neighbourhood, just invoking this function has a complexity of $O(1)$.
+Only when it is enumerated will it have the average complexity of $O(b)$.
+
+Algorithm~\ref{alg:shortest_paths} has to generate a
+tree of depth linearly proportional to $d$,
+with each layer branching to $b$ branches on average.
+Therefore, total complexity is $O(b^d)$
+
+Algorithm~\ref{alg:paths_blocking} is a linear search on the length of the path.
+Therefore, the total complexity of the choosing the path based on blocking analysis.
+It checks all paths of $a$, and for every path of $a$ checks every path of $b$.
+Each check is linear search of complexity $O(z)$
+Therefore, the total complexity will be $O(b^d \cdot b^d \cdot z)$, which is $O(z \cdot b^{2d})$.
+
+As for the naive minimax, it also enumerates all of the possible paths of $a$ and $b$,
+but it does not need to perform linear searches on them.
+Therefore, the total complexity is $O(b^{2d})$
+
+Addition of alpha-beta pruning can drastically reduce the complexity.
+Instead of performing $b \cdot b \cdot b \cdot b \cdots$ computations,
+in an optimal setting we can reach $b \cdot 1 \cdot b \cdot 1 \cdots$, which will result in a complexity of $O(\sqrt{b^{2n}})$.
+
+\clearpage
+\section{Testing}
+
+For testing purposes a special graph was prepared, which is shown on fig.~\ref{fig:test-graph}.
+This graph was designed specifically to accommodate special blocking scenarios to see if our algorithms choose a correct path.
+
+\begin{figure}[H]\centering
+    \normalsize
+    \begin{tikzpicture}[main/.style = {draw, circle}, scale=1.5]
+        \node[main] (n1) at (-0.5,3) {1};
+        \node[main] (n2) at (-0.5,1) {2};
+
+        \node[main] (n3) at (1,4) {3};
+        \node[main] (n4) at (1,3) {4};
+        \node[main] (n5) at (1,1) {5};
+
+        \node[main] (n6) at (2,4) {6};
+        \node[main, double, double distance=1pt] (n7) at (2,2) {7};
+        \node[main] (n8) at (2,0) {8};
+
+        \node[main] (n11) at (3,1.25) {11};
+        \node[main] (n12) at (3,0) {12};
+
+        \node[main] (n9) at (3.5,4) {9};
+        \node[main] (n10) at (3.5,2.75) {10};
+
+        \node[main] (n13) at (4,1.25) {13};
+        \node[main] (n14) at (4,0) {14};
+
+        \node[main, fill=red!90] (n88) at (6,2) {88};
+
+        \draw (n1) -- (n4) node[midway,below]{1};
+        \draw (n1) -- (n3) node[midway,above]{1};
+        \draw (n2) -- (n5) node[midway,above]{1};
+
+        \draw (n3) -- (n6) node[midway,above]{1};
+        \draw (n4) -- (n7) node[midway,above]{1};
+        \draw (n5) -- (n7) node[midway,above]{2};
+        \draw (n5) -- (n8) node[midway,above]{1};
+
+        \draw (n6) -- (n9) node[midway,above]{1};
+        \draw (n7) -- (n10) node[midway,above]{2};
+        \draw (n7) -- (n11) node[midway,above]{1};
+        \draw (n8) -- (n12) node[midway,above]{1};
+
+        \draw (n11) -- (n13) node[midway,above]{1};
+        \draw (n12) -- (n14) node[midway,above]{1};
+
+        \draw (n9) -- (n88) node[midway,above]{1};
+        \draw (n10) -- (n88) node[midway,above]{2};
+        \draw (n13) -- (n88) node[midway,above]{1};
+        \draw (n14) -- (n88) node[midway,above]{1};
+    \end{tikzpicture}
+    \caption{Graph used for testing}
+    \label{fig:test-graph}
+\end{figure}
+
+\subsection{Testing \texorpdfstring{$z$}{\textit{z}} scores}
+
+\begin{table}[h]\centering
+    \scriptsize
+    \begin{tabular}{|c|cccccccc|}
+        \hline
+           & 0        & 1        & 2        & 3        & 4        & 5 & 6 & 7 \\ \hline
+        1  & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 4        & 4 & 4 & 4 \\
+        2  & $\infty$ & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 5 & 5 & 4 \\
+        3  & $\infty$ & $\infty$ & $\infty$ & 3        & 3        & 3 & 3 & 3 \\
+        4  & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 4        & 3 & 3 & 3 \\
+        5  & $\infty$ & $\infty$ & $\infty$ & $\infty$ & 4        & 4 & 3 & 3 \\
+        6  & $\infty$ & $\infty$ & 2        & 2        & 2        & 2 & 2 & 2 \\
+        7  & $\infty$ & $\infty$ & $\infty$ & 3        & 2        & 2 & 2 & 2 \\
+        8  & $\infty$ & $\infty$ & $\infty$ & 3        & 3        & 3 & 3 & 3 \\
+        9  & $\infty$ & 1        & 1        & 1        & 1        & 1 & 1 & 1 \\
+        10 & $\infty$ & $\infty$ & 1        & 1        & 1        & 1 & 1 & 1 \\
+        11 & $\infty$ & $\infty$ & 2        & 2        & 2        & 2 & 2 & 2 \\
+        12 & $\infty$ & $\infty$ & 2        & 2        & 2        & 2 & 2 & 2 \\
+        13 & $\infty$ & 1        & 1        & 1        & 1        & 1 & 1 & 1 \\
+        14 & $\infty$ & 1        & 1        & 1        & 1        & 1 & 1 & 1 \\
+        88 & 0        & 0        & 0        & 0        & 0        & 0 & 0 & 0 \\
+        \hline
+    \end{tabular}
+    \caption{Expected $z$ table of graph from fig.~\ref*{fig:test-graph}}
+    \label{tab:test-z-score-expected}
+\end{table}
+
+The first thing we want to check is the correctness of algorithm \ref{alg:RCSP}.
+All of the other algorithms depend on the correctness of the values of $z(a,t)$.
+
+We ran the algorithm against the testing graph and checked the values in the generated table against the expected values.
+They produced values were all the same as in the table \ref{tab:test-z-score-expected},
+therefore, we concluded that the algorithm works as expected and was implemented correctly.
+
+\subsection{Testing choice of the path}
+
+The second aspect is analysis of the shortest paths.
+The algorithm should avoid being blocked by the other player,
+while simultaneously trying to block them.
+
+Below is the table illustrating some of the settings that can occur on the board from fig.~\ref{fig:test-graph},
+and the move that we expect player $a$ to make, under the assumption that they move first.
+
+\begin{table}[h]\centering
+    \begin{tabular}{c|cccc|c}
+        \toprule
+        No & $v_a$ & $t_a$ & $v_b$ & $t_b$ & expected move of $a$ \\ \midrule
+        1  & 1     & 7     & 2     & 7     & 4                    \\
+        2  & 1     & 6     & 5     & 5     & 3                    \\
+        3  & 1     & 6     & 5     & 4     & 4 or 3               \\
+        4  & 5     & 4     & 4     & 5     & 7                    \\
+        \bottomrule
+    \end{tabular}
+    \caption{Example test settings and an expected next move}
+\end{table}
+
+Below are listed the reasons, for which player $a$ should perform the specified move.
+\begin{enumerate}
+    \item $a$ should choose 4 to block $b$
+    \item $a$ should choose 3 to avoid block by $b$
+    \item $a$ can go to 4, because $b$ will not reach target from $7$
+    \item $a$ should go to $7$ to block $b$
+\end{enumerate}
+
+All of the tested algorithms yielded correct results.
+The only time the result was different than the expected value, was in the case 1,
+the minimax algorithm chose node 4 when playing as white, but 3 when playing as black.
+Although we did not expect that, it is actually a perfectly valid result,
+because the player does not need to block the other one,
+because if black reached the target first, they automatically win.
+However, if the player was white, then choosing 3 would result in a tie, so the algorithm correctly chooses to go to 4 to block the other player.
 
 \end{document}
