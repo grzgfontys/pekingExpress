@@ -9,12 +9,12 @@ class Board:
             board = json.load(f)
 
         # Attributes storing game data
-        road_data = board["roads"]
-        self.locationNumber = board["locations"]["number"]
-        self.critical_locations = board["locations"]["critical"]
-        self.start_node = board["startLocation"]
+        road_data = board["Roads"]
+        self.locationNumber = board["Locations"]["number"]
+        self.critical_locations = board["Locations"]["critical"]
+        self.start_node = board["StartLocation"]
         self.peking = 88
-        self.starting_budget = board["budget"]
+        self.starting_budget = board["Budget"]
         self.maxNodeNumber = (self.peking if self.peking > self.locationNumber else self.locationNumber) + 1
         self.computer_pos, self.player_pos = self.start_node, self.start_node
         self.computer_budget, self.player_budget = self.starting_budget, self.starting_budget
@@ -23,8 +23,8 @@ class Board:
 
         # initialize graph
         self.graph = nx.DiGraph()
-        for (i, src) in enumerate(road_data["source"]):
-            (dst, cost) = (road_data["target"][i], road_data["price"][i])
+        for (i, src) in enumerate(road_data["a"]):
+            (dst, cost) = (road_data["b"][i], road_data["price"][i])
             self.graph.add_edge(src, dst, cost=cost)
 
         # Add critical labels to the nodes

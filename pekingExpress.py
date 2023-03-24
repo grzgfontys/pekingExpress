@@ -3,10 +3,8 @@ import solver
 import matplotlib.pyplot as plt
 
 # json_file = input("Configuration file: ")
-json_file = 'pekingExpressTest5.json'
+json_file = 'examples/game10_large.json'
 # json_file = 'pekingExpressTest2.json'
-
-
 
 winner = False
 who_starts = input("Does the player start? y/n")
@@ -21,7 +19,6 @@ else:
     board = board.Board(json_file, False)
     solver = solver.Solver(board)
     board.update_computer_pos(solver.choose_nex_move_minimax())
-
 
 
 

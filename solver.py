@@ -118,7 +118,7 @@ class Solver:
         if pos_a != target and pos_b != target:
             return None
         if pos_b == target and pos_a == target:
-            raise "Should not happen"  # should be evaluated earlier
+            return 0
         if a_is_white:
             if pos_b == target:
                 return -sys.maxsize  # black win
@@ -140,7 +140,13 @@ class Solver:
         static_eval = self.__game_over_score(
             pos_a, budget_a, pos_b, budget_b, a_is_white)
         if static_eval is not None:
-            return static_eval, (pos_a if playing_a else pos_b)
+            player_pos = (pos_a if playing_a else pos_b)
+            player_budget = (budget_a if playing_a else  budget_b)
+            if static_eval == 0:
+                for move in self.viable_moves(player_pos, player_budget):
+                    if move == 88:
+                        return 0,88
+            return static_eval, player_pos
         if depth == 0:
             # heuristic
             return (self.z(pos_b, budget_b) - self.z(pos_a, budget_a)), (pos_a if playing_a else pos_b)
