@@ -20,7 +20,7 @@ if who_starts == 'y':
 else:
     board = board.Board(json_file, False)
     solver = solver.Solver(board)
-    board.update_computer_pos(solver.choose_next_move_defensive())
+    board.update_computer_pos(solver.choose_nex_move_minimax())
 
 
 
@@ -91,6 +91,6 @@ while not winner:
         if board.player_pos == 88:
             board.player_already_at_88 += 1
         print("~~~~~~")
-        board.update_computer_pos(solver.choose_next_move_defensive())
+        board.update_computer_pos(solver.choose_nex_move_minimax())
         if board.computer_pos == 88:
             board.computer_already_at_88 += 1
